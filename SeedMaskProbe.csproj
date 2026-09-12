@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <OutputType>Library</OutputType>
+    <AssemblyName>SeedMaskProbe</AssemblyName>
+    <RootNamespace>SeedMaskProbe</RootNamespace>
+    <Version>0.1.1</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ScpSlManagedPath Condition="'$(ScpSlManagedPath)' == '' and '$(SCPSL_MANAGED_PATH)' != ''">$(SCPSL_MANAGED_PATH)</ScpSlManagedPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ProbePlugin.cs" />
+    <Compile Remove="tests\**" />
+    <EmbeddedResource Remove="tests\**" />
+    <None Remove="tests\**" />
+    <Content Remove="tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExMod.Exiled" Version="9.14.2" />
+    <Reference Include="Mirror" Condition="Exists('$(ScpSlManagedPath)\Mirror.dll')">
+      <HintPath>$(ScpSlManagedPath)\Mirror.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" Condition="Exists('$(ScpSlManagedPath)\UnityEngine.CoreModule.dll')">
+      <HintPath>$(ScpSlManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass" Condition="Exists('$(ScpSlManagedPath)\Assembly-CSharp-firstpass.dll')">
+      <HintPath>$(ScpSlManagedPath)\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="ValidateScpSlManagedPath" BeforeTargets="ResolveReferences">
+    <Error
+      Condition="'$(ScpSlManagedPath)' == ''"
+      Text="ScpSlManagedPath must be provided as an MSBuild property or SCPSL_MANAGED_PATH environment variable." />
+    <Error
+      Condition="'$(ScpSlManagedPath)' != '' and !Exists('$(ScpSlManagedPath)\Mirror.dll')"
+      Text="ScpSlManagedPath is missing Mirror.dll: $(ScpSlManagedPath)" />
+    <Error
+      Condition="'$(ScpSlManagedPath)' != '' and !Exists('$(ScpSlManagedPath)\UnityEngine.CoreModule.dll')"
+      Text="ScpSlManagedPath is missing UnityEngine.CoreModule.dll: $(ScpSlManagedPath)" />
+    <Error
+      Condition="'$(ScpSlManagedPath)' != '' and !Exists('$(ScpSlManagedPath)\Assembly-CSharp-firstpass.dll')"
+      Text="ScpSlManagedPath is missing Assembly-CSharp-firstpass.dll: $(ScpSlManagedPath)" />
+  </Target>
+
+</Project>
