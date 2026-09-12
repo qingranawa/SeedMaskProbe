@@ -2,9 +2,7 @@
 
 [![EXILED](https://img.shields.io/badge/EXILED-9.14.2-5865F2)](https://github.com/ExMod-Team/EXILED) [![LabAPI](https://img.shields.io/badge/LabAPI-1.1.7-5865F2)](https://github.com/northwood-studios/LabAPI) [![SCP:SL](https://img.shields.io/badge/SCP%3ASL-14.2.7-2f3136)](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/) [![.NET%20Framework](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4)](https://dotnet.microsoft.com/download/dotnet-framework) [![Release](https://img.shields.io/github/v/release/qingranawa/SeedMaskProbe?display_name=tag&sort=semver)](https://github.com/qingranawa/SeedMaskProbe/releases/latest) [![CI](https://github.com/qingranawa/SeedMaskProbe/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/qingranawa/SeedMaskProbe/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> SeedMaskProbe 是一个面向 SCP: Secret Laboratory 的 EXILED 服务端插件，用于遮罩普通玩家通过客户端控制台 `seed` 命令看到的地图 Seed。
-
-> **当前发布版本：** `0.1.1`
+SeedMaskProbe 是一个面向 SCP: Secret Laboratory 的 EXILED 服务端插件，用于隐藏玩家通过客户端控制台 `seed` 命令获取当前回合的真实地图 Seed 种子码。
 
 ---
 
