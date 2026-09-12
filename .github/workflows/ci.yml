@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seed-mask-probe-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore pure logic tests
+        run: dotnet restore ./tests/SeedMaskProbe.Tests/SeedMaskProbe.Tests.csproj
+
+      - name: Run pure logic tests
+        run: dotnet run --project ./tests/SeedMaskProbe.Tests/SeedMaskProbe.Tests.csproj -c Release --no-restore
+
+      - name: Validate public tree
+        shell: pwsh
+        run: |
+          $expected = @(
+            '.github/workflows/ci.yml',
+            '.gitignore',
+            'LICENSE',
+            'README.md',
+            'SeedMaskPlugin.cs',
+            'SeedMaskProbe.csproj',
+            'SeedMaskSettings.cs',
+            'SeedMasking.cs',
+            'release/SeedMaskProbe.dll',
+            'tests/SeedMaskProbe.Tests/Program.cs',
+            'tests/SeedMaskProbe.Tests/SeedMaskProbe.Tests.csproj'
+          )
+
+          $files = @(git ls-files)
+          $unexpected = @($files | Where-Object { $_ -notin $expected })
+          if ($unexpected.Count -gt 0) {
+            throw "Unexpected tracked public files: $($unexpected -join ', ')"
+          }
+
+          $forbidden = @($files | Where-Object {
+            $_ -match '\.(pdb|log|png)$' -or
+            $_ -match '(^|/)(Assembly-CSharp|LabApi|Exiled.*)\.dll$' -or
+            $_ -match '(^|/)(bin|obj)/'
+          })
+          if ($forbidden.Count -gt 0) {
+            throw "Forbidden release content found: $($forbidden -join ', ')"
+          }
+
+          $project = Get-Content -Raw -LiteralPath 'SeedMaskProbe.csproj'
+          if ($project -match 'D:\\Project|C:\\Users\\Jeff') {
+            throw 'The project contains a developer-specific absolute path.'
+          }
+
+          $releaseFiles = @(Get-ChildItem -LiteralPath 'release' -File | Select-Object -ExpandProperty Name)
+          if ($releaseFiles.Count -ne 1 -or $releaseFiles[0] -ne 'SeedMaskProbe.dll') {
+            throw "Release directory must contain only SeedMaskProbe.dll: $($releaseFiles -join ', ')"
+          }
+
+          $readme = Get-Content -Raw -LiteralPath 'README.md'
+          if ($readme -notmatch 'github.com/qingranawa/SeedMaskProbe/releases/latest') {
+            throw 'README is missing the repository Release badge link.'
+          }
+
+          if ($readme -notmatch 'github.com/qingranawa/SeedMaskProbe/actions/workflows/ci\.yml') {
+            throw 'README is missing the repository CI badge link.'
+          }
+
+          git diff --check
+
+  release:
+    name: Publish GitHub Release
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release metadata
+        shell: pwsh
+        run: |
+          $project = [xml](Get-Content -Raw -LiteralPath 'SeedMaskProbe.csproj')
+          $projectVersion = $project.Project.PropertyGroup |
+            Where-Object { $_.Version } |
+            Select-Object -First 1 -ExpandProperty Version
+          $tagVersion = $env:GITHUB_REF_NAME.Substring(1)
+
+          if ([string]$projectVersion -ne $tagVersion) {
+            throw "Tag version $tagVersion does not match project version $projectVersion."
+          }
+
+          if (-not (Test-Path -LiteralPath 'release/SeedMaskProbe.dll')) {
+            throw 'release/SeedMaskProbe.dll is missing.'
+          }
+
+          $releaseFiles = @(Get-ChildItem -LiteralPath 'release' -File | Select-Object -ExpandProperty Name)
+          if ($releaseFiles.Count -ne 1 -or $releaseFiles[0] -ne 'SeedMaskProbe.dll') {
+            throw "Release directory must contain only SeedMaskProbe.dll: $($releaseFiles -join ', ')"
+          }
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "SeedMaskProbe $GITHUB_REF_NAME" \
+            --generate-notes \
+            --latest \
+            "release/SeedMaskProbe.dll#SeedMaskProbe.dll"
