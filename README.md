@@ -1,6 +1,6 @@
 # SeedMaskProbe
 
-[![LabAPI](https://img.shields.io/badge/LabAPI-1.1.7-5865F2)](https://github.com/northwood-studios/LabAPI) [![SCP:SL](https://img.shields.io/badge/SCP%3ASL-14.2.7-2f3136)](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/) [![.NET%20Framework](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4)](https://dotnet.microsoft.com/download/dotnet-framework) [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![EXILED](https://img.shields.io/badge/EXILED-9.14.2-5865F2)](https://github.com/ExMod-Team/EXILED) [![LabAPI](https://img.shields.io/badge/LabAPI-1.1.7-5865F2)](https://github.com/northwood-studios/LabAPI) [![SCP:SL](https://img.shields.io/badge/SCP%3ASL-14.2.7-2f3136)](https://store.steampowered.com/app/700330/SCP_Secret_Laboratory/) [![.NET%20Framework](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4)](https://dotnet.microsoft.com/download/dotnet-framework) [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > SeedMaskProbe 是一个面向 SCP: Secret Laboratory 的 EXILED 服务端插件，用于遮罩普通玩家通过客户端控制台 `seed` 命令看到的地图 Seed。
 
